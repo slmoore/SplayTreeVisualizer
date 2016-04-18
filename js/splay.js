@@ -1,4 +1,5 @@
 /*
+
 JavaScript Splay Tree
 
 Description:
@@ -7,7 +8,7 @@ Description:
 
 Purpose:
   Popular nodes will be quicker and more efficiently accessed.  
-  If a tree contains many nodes however only a small percentage are regularly used, 
+  If a tree contains many nodes, but only a small percentage are regularly used, 
   then it is more efficient to keep the recently accessed nodes closer to the root.
 
 Methods:
@@ -36,11 +37,13 @@ Original Binary Search Tree structure modeled after Java implementation by:
 
 Splay Tree Operations modeled after Java implementation by:
   Josh Israel
-  algs4.cs.princeton.edu/33balanced/SplayBST.java
-*/
+  algs4.cs.princeton.edu/33balanced/SplayBst.java
 
-//Modify null checks to instead use a more general sense of "undefined"
-//find the best methodology to mimic something like empty() in php
+Good References:
+  http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf
+  http://courses.cs.washington.edu/courses/cse326/01au/lectures/SplayTrees.ppt
+
+*/
 
 //Node Object Constructor
 function Node(key,val) {
@@ -50,159 +53,116 @@ function Node(key,val) {
   this.right = null;
 }
 
-//Binary Search Tree Constructor
-function splayBst() {
+//Splay Tree Constructor
+function SplayBst() {
   this.root = null;
 }
 
 //Get Node from Tree
 //
-//retrieves a node
-//traverses tree recursively from root
-//based on key
-splayBst.prototype.search = function(k) {
-  var searchRecursive = function(cNode, key) {
-    if (cNode === null) 
-      return null;
-
-    if (key < cNode.key)
-      return searchRecursive(cNode.left,key);
-    else if (key > cNode.key) 
-      return searchRecursive(cNode.right,key);
-    
-    return cNode;
-  };
-
-  if (this.root === null || k === null)
+//splaying handles the recursive tree traversal
+//if the returned splay value is equal to the key
+//then it is found, otherwise the closest
+//value is now the root and null is returned
+SplayBst.prototype.search = function(k) {
+  if (this.root === null || (typeof k !== "number" && typeof k !== "string"))
     return null;
 
-  return searchRecursive(this.root,k);
+  this.splay(k);
+  return this.root.key === k ? this.root : null;
 };
 
 //Put Node on Tree
 //
-//adds node to the correct location on tree;
-//traverses tree recursively from root
-//based on key
-splayBst.prototype.insert = function(k,v) {
-  var insertRecursive = function(cNode, key, val) {
-    //return a new node when current node is null
-    //this is what generates the inserted node
-    //it is then placed as a left or right link
-    //using the recursive calls below
-    if (cNode === null) {
-      return new Node(key, val);
-    }
-    
-    //recursive calls below continue until a null link is reached
-    //
-    //if the child of current node is null
-    //  then the recursive call will return a new node 
-    //  and assign it to the child completing the insertion
-    //if the child is not null
-    //  then the recursive call will continue
+//if the key does not exist this will insert
+//a new node to the top of the tree
+//
+//new root links depend on the existing root key
+SplayBst.prototype.insert = function(k,v) {
+  var n;
+  if ((typeof k !== "number" && typeof k !== "string") 
+    || (typeof v !== "number" && typeof v !== "string")) {
+    throw new Error("Invalid insert");
+    return;
+  }
 
-    //traverse left if new key is less
-    if (key < cNode.key) {
-      cNode.left = insertRecursive(cNode.left,key,val);
-
-    //traverse right if new key is greater
-    } else if (key > cNode.key) {
-      cNode.right = insertRecursive(cNode.right,key,val);
-    
-    //else the new key is not less or greater, so it already exists 
-    //replace the value
-    } else {
-      cNode.val = val;
-    }
-    
-    //linking or replacing is finished
-    //return current node off the recursion stack
-    return cNode;
-  };
-
-  //handle null root
+  //there is no root yet
   if (this.root === null) {
-    if (k === null || v === null) {
-      return null;
+    this.root = new Node(k,v);
+    return;
+  }
+  //splay the closest existing match to the root
+  this.splay(k);
+
+  //if existing root key > new root key
+  //link the existing left as the new left
+  //and the current root becomes the new right
+  if (this.root.key > k) {
+    n = new Node(k,v);
+    n.left = this.root.left;
+    n.right = this.root;
+    this.root.left = null;
+    this.root = n;
+
+  //if existing root key < new root key
+  //link the existing right as the new right
+  //and the current root becomes the new left
+  } else if (this.root.key < k) {
+    n = new Node(k,v);
+    n.right = this.root.right;
+    n.left = this.root;
+    this.root.right = null;
+    this.root = n;
+  
+  //existing root key === new root key
+  //replace only the value
+  } else {
+    this.root.val = val;
+  }
+
+};
+
+// Removal reassigns left and right links for the tree
+// Garbage collector takes the node once it is disconnected
+SplayBst.prototype.remove = function(k) {
+  var temp;
+  if (this.root === null || (typeof k !== "number" && typeof k !== "string"))
+    return;
+  //splay based on removal key
+  this.splay(k);
+
+  //continue if the key exists (now at root)
+  if (this.root.key === k) {
+  //no subtrees
+    if (this.root.left === null && this.root.right === null) {
+      this.root = null;
+  //only right subtree
+    } else if (this.root.left === null) {
+      this.root = this.root.right;
+  //both subtrees
+  //unlink root and join subtrees
     } else {
-      this.root = new Node(k,v);
-      return this.root;
+      //store right subtree
+      temp = this.root.right;
+      //store left subtree
+      this.root = this.root.left;
+      //splay left subtree around the "max" key
+      //after earlier splay, the removal key must be greater 
+      //than the "max" of the left subtree
+      //this means it can be used for this splay operation
+      //the result is a left subtree with no right child
+      this.splay(k);
+      //reconnect right subtree
+      this.root.right = temp;
     }
   }
 
-  //begin at root
-  return insertRecursive(this.root,k,v);
-};
-
-// * Removal Only Reassigns left and right links for the tree *
-// * Garbage collector takes the node once it is disconnected *
-//
-// Removal Handles 3 Scenarios:
-//
-// 1. node has no children, assign parent's link to the removal node to null and the node itself to null
-// 2. node has one child, node's child is assigned to the parent link, node is assigned to null
-// 3. node has two children, replace node with it's successor:
-//    - find min child from it's right subtree (min(node.right); i.e. successor)
-//    - replace removal node's data (key,val) with min child data (they are now duplicates)
-//    - remove the min child node (assign it to null)
-splayBst.prototype.remove = function(k) {
-  var removeRecursive = function(cNode, key) {
-    var temp;
-    if (cNode === null) 
-      return null;
-
-    //as recursive stack returns 
-    //each node is assigned back
-    //to the parent links (left or right)
-
-    //go left
-    if (key < cNode.key) {
-      cNode.left  = removeRecursive(cNode.left, key);
-    //go right
-    } else if (key > cNode.key) {
-      cNode.right = removeRecursive(cNode.right, key);
-    //key matches, begin link reassignment
-    } else { 
-        //no children
-        if (cNode.left === null && cNode.right === null) {
-          return null;
-        }
-        //one child
-        if (cNode.right === null) {
-          return cNode.left;
-        }
-        if (cNode.left === null) {
-          return cNode.right;
-        }
-        //two children
-        //find successor (min of right subtree)
-        temp = this.min(cNode.right);
-        //replace values with successor
-        cNode.key = temp.key;
-        cNode.val = temp.val;
-        //remove successor links from right subtree
-        //and reassign right link
-        cNode.right = removeRecursive(cNode.right,temp.key);
-    }
-    //returns completed node
-    //to a recursive call or 
-    //it's the final tree root
-    return cNode;
-  }.bind(this);
-
-  if (this.root === null || k === null)
-    return null;
-  
-  //final result of recursive calls a tree
-  //without any link to the removed node
-  this.root = removeRecursive(this.root,k);
 };
 
 //Get the Minimum Node
 //
 //key based
-splayBst.prototype.min = function(n) {
+SplayBst.prototype.min = function(n) {
   var current;
   var minRecursive = function(cNode) {
     if (cNode.left) {
@@ -214,7 +174,7 @@ splayBst.prototype.min = function(n) {
   if (this.root === null)
     return null;
 
-  if (n)
+  if (n instanceof Node)
     current = n;
   else
     current = this.root;
@@ -225,7 +185,7 @@ splayBst.prototype.min = function(n) {
 //Get the Maximum Node
 //
 //key based
-splayBst.prototype.max = function(n) {
+SplayBst.prototype.max = function(n) {
   var current;
   var maxRecursive = function(cNode) {
     if (cNode.right) {
@@ -237,7 +197,7 @@ splayBst.prototype.max = function(n) {
   if (this.root === null)
     return null;
 
-  if (n)
+  if (n instanceof Node)
     current = n;
   else
     current = this.root;
@@ -253,43 +213,43 @@ splayBst.prototype.max = function(n) {
 //then perform action on the parent node
 //then traverse to the first right child node
 //and begin the process again
-splayBst.prototype.inOrder = function(cNode,nodeArray) {
+SplayBst.prototype.inOrder = function(n,nodeArray) {
   if (!Array.isArray(nodeArray)) {
     throw new Error("inOrder requires array");
   }
 
-  if(cNode) {
-    this.inOrder(cNode.left,nodeArray);
-    nodeArray.push(cNode);
-    this.inOrder(cNode.right,nodeArray);
+  if (n instanceof Node) {
+    this.inOrder(n.left,nodeArray);
+    nodeArray.push(n);
+    this.inOrder(n.right,nodeArray);
   }
 };
 
 //Rotate node to the right
 //(becomes right child of its left child)
-splayBst.prototype.rotateRight = function(cNode) {
+SplayBst.prototype.rotateRight = function(n) {
   var temp;
-  if (cNode) {
-    temp = cNode.left;
-    cNode.left = temp.right;
-    temp.right = cNode;
+  if (n instanceof Node) {
+    temp = n.left;
+    n.left = temp.right;
+    temp.right = n;
   }
   return temp;
-}
+};
 
 //Rotate node to the left
 //(becomes left child of its right child)
-splayBst.prototype.rotateLeft = function(cNode) {
+SplayBst.prototype.rotateLeft = function(n) {
   var temp;
-  if (cNode) {
-    temp = cNode.right;
-    cNode.right = temp.left;
-    temp.left = cNode;
+  if (n instanceof Node) {
+    temp = n.right;
+    n.right = temp.left;
+    temp.left = n;
   }
   return temp;
-}
+};
 
-//Splaying:
+// Splaying:
 //  To “splay node x”, traverse up the tree from
 //  node x to root, rotating along the way until x
 //  is the root.
@@ -308,96 +268,92 @@ splayBst.prototype.rotateLeft = function(cNode) {
 //         x about its new parent (former grandparent).
 //
 // Reference:
-// http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf
+//  http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf
 //
-// Code below is a modification of original Java splaying code by:
-//   Josh Israel
-//   http://algs4.cs.princeton.edu/33balanced/SplayBST.java
-splayBst.prototype.splay = function(k) {
-  var splayRecursive = function(cNode, key) {
+SplayBst.prototype.splay = function(k) {
+  var splayRecursive = function(n, key) {
     //if empty return
-    if (cNode === null)
+    if (n === null)
       return null;
 
     //go left
-    if (key < cNode.key) {
+    if (key < n.key) {
       //Key is not in tree, exit
-      if (cNode.left === null) 
-        return cNode;
+      if (n.left === null) 
+        return n;
 
       //Zig-Zig (i.e. left left)
-      if (key < cNode.left.key) {
+      if (key < n.left.key) {
         //Recursively get node matching key
-        cNode.left.left = splayRecursive(cNode.left.left, key);
+        n.left.left = splayRecursive(n.left.left, key);
         //Rotate parent around grandparent
-        cNode = this.rotateRight(cNode);
+        n = this.rotateRight(n);
 
       //Zig-Zag (i.e. left right)
-      } else if (key > cNode.left.key) {
+      } else if (key > n.left.key) {
         //Recursively get node matching key
-        cNode.left.right = splayRecursive(cNode.left.right, key);
+        n.left.right = splayRecursive(n.left.right, key);
         //Rotate x around current parent
-        if (cNode.left.right !== null)
-          cNode.left = this.rotateLeft(cNode.left);
+        if (n.left.right !== null)
+          n.left = this.rotateLeft(n.left);
       }
 
       //Rotate x around current parent
-      if (cNode.left === null)
-        return cNode;
+      if (n.left === null)
+        return n;
       else 
-        return this.rotateRight(cNode);
+        return this.rotateRight(n);
 
     //go right
-    } else if (key > cNode.key) {
+    } else if (key > n.key) {
       // Key is not in tree, exit
-      if (cNode.right === null) 
-        return cNode;
+      if (n.right === null) 
+        return n;
 
       //Zig-Zig (i.e. right right)
-      if (key > cNode.right.key) {
+      if (key > n.right.key) {
         //Recursively get node matching key
-        cNode.right.right = splayRecursive(cNode.right.right, key);
+        n.right.right = splayRecursive(n.right.right, key);
         //Rotate parent around grandparent
-        cNode = this.rotateLeft(cNode);
+        n = this.rotateLeft(n);
 
       //Zig-Zag (i.e. right left)
-      } else if (key < cNode.right.key) {
+      } else if (key < n.right.key) {
         //Recursively get node matching key
-        cNode.right.left = splayRecursive(cNode.right.left, key);
+        n.right.left = splayRecursive(n.right.left, key);
         //Rotate x around current parent
-        if (cNode.right.left !== null)
-          cNode.right = this.rotateRight(cNode.right);
+        if (n.right.left !== null)
+          n.right = this.rotateRight(n.right);
       }
 
       //Rotate x around current parent
-      if (cNode.right === null)
-        return cNode;
+      if (n.right === null)
+        return n;
       else 
-        return this.rotateLeft(cNode);
+        return this.rotateLeft(n);
     
     //key must be equal
     } else {
-      return cNode;
+      return n;
     }
 
   }.bind(this);
 
-  if (this.root === null || k === null)
-    return null;
+  if (this.root === null || (typeof k !== "number" && typeof k !== "string")) {
+    throw new Error("Invalid splay");
+    return;
+  }
   
   //final result of recursive calls
-  //tree "splayed" around new root
+  //returns a tree "splayed" around new root
   this.root = splayRecursive(this.root,k);
-  return this.root;
-}
-
-
-
+  return;
+};
 
 window.onload = function() {
   var nodes = [];
   //setup
-  var tree = new splayBst();
+  var tree = new SplayBst();
   tree.insert(10,"shawn");
   tree.insert(4,"addison");
   tree.insert(12,"craig");
@@ -409,13 +365,12 @@ window.onload = function() {
   tree.insert(11,"jasper");
   tree.insert(2,"becca");
   tree.insert(20,"alexa");
-
-
-  console.log("splay 19");
-  tree.splay(19);
-  tree.inOrder(tree.root,nodes);
-  console.log(nodes);
   console.log(tree.root);
-
+  console.log(tree.search(19));
+  console.log(tree.root);
+  tree.remove(13);
+  console.log(tree.root);
+  tree.remove(10);
+  console.log(tree.root);
 };
 
