@@ -393,7 +393,12 @@ var visualJson = function(n) {
   return buildJson(n);
 };
 
+
+//--------------//
+// Main Program //
+//--------------//
 var init = function() {
+  //Tree Instance
   var splayTree = new SplayBst();
   
   //diagram dimensions
@@ -416,32 +421,33 @@ var init = function() {
   // Visualization with D3.js
   //
   // References:
-  //   https://leanpub.com/D3-Tips-and-Tricks
+  // https://leanpub.com/D3-Tips-and-Tricks
   //
   var drawTree = function(root) {
     var i = 0;
     var nodes, links;
+    //clear existing nodes
     svg.selectAll('.node').remove();
     svg.selectAll('.link').remove();
     
     if (root === null)
       return;
 
-    // Get nodes and links
+    //generate nodes and links based on tree root
     nodes = tree.nodes(root).reverse();
     links = tree.links(nodes);
 
-    // Normalize height based on node depth
+    //adjust height using depth
     nodes.forEach(function(d) { 
       d.y = d.depth * 70; 
     });
 
-    // Declare nodes
+    //setup node elements
     var node = svg.selectAll("g.node").data(nodes, function(d) { 
       return d.id || (d.id = ++i); 
     });
 
-    // Setup node location, shape, and text
+    //node location, shape, and text
     var nodeEnter = node.enter().append("g")
       .attr("class", "node")
       .attr("transform", function(d) { 
@@ -471,6 +477,73 @@ var init = function() {
       .attr("class", "link")
       .attr("d", diagonal);
   }
+
+  var highlightMax = function(t) {
+    var maxNode;
+    if (!(t instanceof SplayBst))
+      return;
+    else
+      maxNode = t.max();
+    
+    if (maxNode === null)
+      return;
+
+    //loop nodes checking for max
+    //apply style change when found
+    d3.selectAll("g.node").each(function(d,i) { 
+      var clearStyle = function() {
+        d3.select(this).classed("max", false);
+      }.bind(this);
+      if (d.key === maxNode.key) {
+        d3.select(this).classed("max", true);
+        setTimeout(clearStyle,2000);
+      }
+    });
+  };
+
+  var highlightMin = function(t) {
+    var minNode;
+    if (!(t instanceof SplayBst))
+      return;
+    else
+      minNode = t.min();
+    
+    if (minNode === null)
+      return;
+
+    //loop nodes checking for max
+    //apply style change when found
+    d3.selectAll("g.node").each(function(d,i) {
+      var clearStyle = function() {
+        d3.select(this).classed("min", false);
+      }.bind(this);
+      if (d.key === minNode.key) {
+        d3.select(this).classed("min", true);
+        setTimeout(clearStyle,2000);
+      }
+    });
+  };
+
+//NOT WAITING FOR HIGHLIGHT/UNHIGHLIGHT TIMER
+//NEED TO HANDLE DEL
+  var highlight = function(x) {
+    if (!Array.isArray(x))
+      return;
+
+    x.forEach(function(current) {
+      //loop node elements checking for node
+      //apply style change when found
+      d3.selectAll("g.node").each(function(d,i) {
+        var clearStyle = function() {
+          d3.select(this).classed("selected", false);
+        }.bind(this);
+        if (d.key === current) {
+          d3.select(this).classed("selected", true);
+          setTimeout(clearStyle,500);
+        }
+      });
+    });
+  };
 
   //interactive elements
   var formAdd = document.getElementById("add-form");
@@ -526,22 +599,28 @@ var init = function() {
     }
   });
 
+//NOT WORKING YET, ARRAY BUILD IS FINE, HIGHLIGHT IS NOT STAGGERED
   //process traversal button
   inorderButton.addEventListener("click", function(e) {
+    var a = [];
+    var ordered = function(n) {
+      a.push(n.key);
+    }
     e.preventDefault();
-    splayTree.inOrder(splayTree.root,function(x){console.log(x);});
+    splayTree.inOrder(splayTree.root,ordered);
+    highlight(a);
   });
 
   //process max button
   maxButton.addEventListener("click", function(e) {
     e.preventDefault();
-    console.log(splayTree.max(splayTree.root));
+    highlightMax(splayTree);
   });
 
   //process min button
   minButton.addEventListener("click", function(e) {
     e.preventDefault();
-    console.log(splayTree.min(splayTree.root));
+    highlightMin(splayTree);
   });
 
 };

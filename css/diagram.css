@@ -15,3 +15,22 @@
   stroke-width: 2px;
 }
 
+.selected {
+  fill: #0000FF;
+}
+
+.max {
+  fill: #FFA500;
+}
+
+.min {
+  fill: #FF0000;
+}
+
+.max, .min {
+  transition: all 0.2s ease-in;	
+}
+.max text, .min text, .selected text {
+  font-size: 14px;
+}
+
