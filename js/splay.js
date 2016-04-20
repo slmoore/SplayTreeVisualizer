@@ -350,27 +350,164 @@ SplayBst.prototype.splay = function(k) {
   return;
 };
 
-window.onload = function() {
-  var nodes = [];
-  //setup
-  var tree = new SplayBst();
-  tree.insert(10,"shawn");
-  tree.insert(4,"addison");
-  tree.insert(12,"craig");
-  tree.insert(19,"michael");
-  tree.insert(1,"jennifer");
-  tree.insert(15,"nancy");
-  tree.insert(5,"tonya");
-  tree.insert(21,"tiffany");
-  tree.insert(11,"jasper");
-  tree.insert(2,"becca");
-  tree.insert(20,"alexa");
-  console.log(tree.root);
-  console.log(tree.search(19));
-  console.log(tree.root);
-  tree.remove(13);
-  console.log(tree.root);
-  tree.remove(10);
-  console.log(tree.root);
+//------------------------------//
+// Visualization Helper Methods //
+//------------------------------//
+
+//convert tree structure into
+//d3 compatible JSON
+var visualJson = function(n) {
+  var buildJson = function(cNode) {
+    var jObj = {};
+    if (cNode !== null) {
+      jObj.key = cNode.key;
+      jObj.val = cNode.val;
+      jObj.children = [];
+      if (cNode.left !== null)
+        jObj.children.push(buildJson(cNode.left));
+      if (cNode.right !== null)
+        jObj.children.push(buildJson(cNode.right));
+    }
+    return jObj;
+  };
+
+  if (!(n instanceof Node))
+    return null;
+
+  return buildJson(n);
 };
 
+//
+// Visualization with D3.js
+//
+// References:
+//   https://leanpub.com/D3-Tips-and-Tricks
+//
+var drawTree = function(root,tree,svg,diagonal) {
+  // Get nodes and links
+  var nodes = tree.nodes(root).reverse();
+  var links = tree.links(nodes);
+
+  // Normalize height based on node depth
+  nodes.forEach(function(d) { d.y = d.depth * 70; });
+
+  // Declare nodes
+  var node = svg.selectAll("g.node").data(nodes, function(d) { 
+    return d.id || (d.id = d.key); 
+  });
+
+  // Setup node location, shape, and text
+  var nodeEnter = node.enter().append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) { 
+      return "translate(" + d.x + "," + d.y + ")"; 
+    });
+
+  nodeEnter.append("circle")
+    .attr("r", 10)
+    .style("fill", "#fff");
+
+  nodeEnter.append("text")
+    .attr("y", 18)
+    .attr("dy", ".35em")
+    .attr("text-anchor", "middle")
+    .text(function(d) { 
+      return d.key +' : '+ d.val; 
+    })
+    .style("fill-opacity", 1);
+
+  // Declare links
+  var link = svg.selectAll("path.link").data(links, function(d) { 
+    return d.target.id; 
+  });
+
+  // Setup links
+  link.enter().insert("path", "g")
+    .attr("class", "link")
+    .attr("d", diagonal);
+}
+
+var formAdd = document.getElementById("add-form");
+var formRemove = document.getElementById("remove-form");
+var formFind = document.getElementById("search-form");
+var inorderButton = document.getElementById("inorder-button");
+var minButton = document.getElementById("min-button");
+var maxButton = document.getElementById("max-button");
+
+
+var splayTree = new SplayBst();
+
+//process insert form
+
+//process delete form
+
+//process search form
+
+//process traversal button
+
+//process max button
+
+//process min button
+
+var init = function() {
+
+  //build tree data
+  
+    splayTree.insert(10,"shawn");
+    splayTree.insert(4,"addison");
+    splayTree.insert(12,"craig");
+    splayTree.insert(19,"michael");
+    splayTree.insert(1,"jennifer");
+    splayTree.insert(15,"nancy");
+    splayTree.insert(5,"tonya");
+    splayTree.insert(21,"tiffany");
+    splayTree.insert(11,"jasper");
+    splayTree.insert(2,"becca");
+    splayTree.insert(20,"alexa");
+    splayTree.insert(16,"norah");
+  
+
+  //diagram dimensions
+  var margin = {top: 20, right: 100, bottom: 20, left: 100},
+    width = 960 - margin.right - margin.left,
+    height = 1000 - margin.top - margin.bottom;
+
+  //vector element
+  var svg = d3.select("#tree-display").append("svg")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  //complete tree
+  var tree = d3.layout.tree().size([height, width]);
+  //links
+  var diagonal = d3.svg.diagonal().projection(function(d) { return [d.x, d.y]; });
+
+  console.log(visualJson(splayTree.root));
+
+  drawTree(visualJson(splayTree.root),tree,svg,diagonal);
+
+};
+
+window.onload = init;
+
+
+  // request that bypasses CORS requirements using JSONP
+  var requestJSONP = function(url) {
+    // create script with passed in URL
+    var script = document.createElement('script');
+    script.src = url;
+    // after the script is loaded (and executed), remove it
+    script.addEventListener("load", function(e) {
+      e.target.remove();
+    });
+    // insert script tag into the DOM (append to <head>)
+    var head = document.getElementsByTagName('head')[0];
+    head.insertBefore(script, null);
+  }
+
+  //add button action
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    requestJSONP(listUrl(input.value));
+  });
