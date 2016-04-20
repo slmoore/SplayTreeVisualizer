@@ -117,7 +117,7 @@ SplayBst.prototype.insert = function(k,v) {
   //existing root key === new root key
   //replace only the value
   } else {
-    this.root.val = val;
+    this.root.val = v;
   }
 
 };
@@ -213,16 +213,31 @@ SplayBst.prototype.max = function(n) {
 //then perform action on the parent node
 //then traverse to the first right child node
 //and begin the process again
-SplayBst.prototype.inOrder = function(n,nodeArray) {
-  if (!Array.isArray(nodeArray)) {
-    throw new Error("inOrder requires array");
-  }
-
+SplayBst.prototype.inOrder = function(n,fun) {
   if (n instanceof Node) {
-    this.inOrder(n.left,nodeArray);
-    nodeArray.push(n);
-    this.inOrder(n.right,nodeArray);
+    this.inOrder(n.left,fun);
+    if (fun) {fun(n);}
+    this.inOrder(n.right,fun);
   }
+};
+
+//True if the key exists in the tree
+//False if the key does not exist in the tree
+SplayBst.prototype.contains = function(k) {
+  var containsRecursive = function(n) {
+    if (n instanceof Node) {
+      if (n.key === k) {
+        return true;
+      }
+      containsRecursive(n.left);
+      containsRecursive(n.right);
+    }
+  };
+
+  if (this.root === null || (typeof k !== "number" && typeof k !== "string"))
+    return false;
+
+  return containsRecursive(this.root) ? true : false;
 };
 
 //Rotate node to the right
@@ -363,10 +378,11 @@ var visualJson = function(n) {
       jObj.key = cNode.key;
       jObj.val = cNode.val;
       jObj.children = [];
-      if (cNode.left !== null)
-        jObj.children.push(buildJson(cNode.left));
-      if (cNode.right !== null)
-        jObj.children.push(buildJson(cNode.right));
+      jObj.children.push(buildJson(cNode.left));
+      jObj.children.push(buildJson(cNode.right));
+    } else {
+      jObj.key = "empty";
+      jObj.val = "leaf";
     }
     return jObj;
   };
@@ -377,98 +393,11 @@ var visualJson = function(n) {
   return buildJson(n);
 };
 
-//
-// Visualization with D3.js
-//
-// References:
-//   https://leanpub.com/D3-Tips-and-Tricks
-//
-var drawTree = function(root,tree,svg,diagonal) {
-  // Get nodes and links
-  var nodes = tree.nodes(root).reverse();
-  var links = tree.links(nodes);
-
-  // Normalize height based on node depth
-  nodes.forEach(function(d) { d.y = d.depth * 70; });
-
-  // Declare nodes
-  var node = svg.selectAll("g.node").data(nodes, function(d) { 
-    return d.id || (d.id = d.key); 
-  });
-
-  // Setup node location, shape, and text
-  var nodeEnter = node.enter().append("g")
-    .attr("class", "node")
-    .attr("transform", function(d) { 
-      return "translate(" + d.x + "," + d.y + ")"; 
-    });
-
-  nodeEnter.append("circle")
-    .attr("r", 10)
-    .style("fill", "#fff");
-
-  nodeEnter.append("text")
-    .attr("y", 18)
-    .attr("dy", ".35em")
-    .attr("text-anchor", "middle")
-    .text(function(d) { 
-      return d.key +' : '+ d.val; 
-    })
-    .style("fill-opacity", 1);
-
-  // Declare links
-  var link = svg.selectAll("path.link").data(links, function(d) { 
-    return d.target.id; 
-  });
-
-  // Setup links
-  link.enter().insert("path", "g")
-    .attr("class", "link")
-    .attr("d", diagonal);
-}
-
-var formAdd = document.getElementById("add-form");
-var formRemove = document.getElementById("remove-form");
-var formFind = document.getElementById("search-form");
-var inorderButton = document.getElementById("inorder-button");
-var minButton = document.getElementById("min-button");
-var maxButton = document.getElementById("max-button");
-
-
-var splayTree = new SplayBst();
-
-//process insert form
-
-//process delete form
-
-//process search form
-
-//process traversal button
-
-//process max button
-
-//process min button
-
 var init = function() {
-
-  //build tree data
+  var splayTree = new SplayBst();
   
-    splayTree.insert(10,"shawn");
-    splayTree.insert(4,"addison");
-    splayTree.insert(12,"craig");
-    splayTree.insert(19,"michael");
-    splayTree.insert(1,"jennifer");
-    splayTree.insert(15,"nancy");
-    splayTree.insert(5,"tonya");
-    splayTree.insert(21,"tiffany");
-    splayTree.insert(11,"jasper");
-    splayTree.insert(2,"becca");
-    splayTree.insert(20,"alexa");
-    splayTree.insert(16,"norah");
-  
-
   //diagram dimensions
-  var margin = {top: 20, right: 100, bottom: 20, left: 100},
+  var margin = {top: 20, right: 20, bottom: 20, left: 20},
     width = 960 - margin.right - margin.left,
     height = 1000 - margin.top - margin.bottom;
 
@@ -483,31 +412,138 @@ var init = function() {
   //links
   var diagonal = d3.svg.diagonal().projection(function(d) { return [d.x, d.y]; });
 
-  console.log(visualJson(splayTree.root));
 
-  drawTree(visualJson(splayTree.root),tree,svg,diagonal);
+  // Visualization with D3.js
+  //
+  // References:
+  //   https://leanpub.com/D3-Tips-and-Tricks
+  //
+  var drawTree = function(root) {
+    var i = 0;
+    var nodes, links;
+    svg.selectAll('.node').remove();
+    svg.selectAll('.link').remove();
+    
+    if (root === null)
+      return;
+
+    // Get nodes and links
+    nodes = tree.nodes(root).reverse();
+    links = tree.links(nodes);
+
+    // Normalize height based on node depth
+    nodes.forEach(function(d) { 
+      d.y = d.depth * 70; 
+    });
+
+    // Declare nodes
+    var node = svg.selectAll("g.node").data(nodes, function(d) { 
+      return d.id || (d.id = ++i); 
+    });
+
+    // Setup node location, shape, and text
+    var nodeEnter = node.enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { 
+        return "translate(" + d.x + "," + d.y + ")"; 
+      });
+
+    nodeEnter.append("circle")
+      .attr("r", 10)
+      .style("fill", "#fff");
+
+    nodeEnter.append("text")
+      .attr("y", 18)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .text(function(d) { 
+        return d.key +' : '+ d.val; 
+      })
+      .style("fill-opacity", 1);
+
+    // Declare links
+    var link = svg.selectAll("path.link").data(links, function(d) { 
+      return d.target.id; 
+    });
+
+    // Setup links
+    link.enter().insert("path", "g")
+      .attr("class", "link")
+      .attr("d", diagonal);
+  }
+
+  //interactive elements
+  var formAdd = document.getElementById("add-form");
+  var formRemove = document.getElementById("remove-form");
+  var formSearch = document.getElementById("search-form");
+  var inorderButton = document.getElementById("inorder-button");
+  var minButton = document.getElementById("min-button");
+  var maxButton = document.getElementById("max-button");
+  //insert event
+  formAdd.addEventListener("submit", function(e) {
+    var k,v,rx;
+    e.preventDefault();
+    k = e.target.keyText.value;
+    v = e.target.valText.value;
+    rx = /^[a-z]+$/i;
+
+    if ((Number(k) || k === 0) && v.match(rx)) {
+      splayTree.insert(Number(k),v);
+      drawTree(visualJson(splayTree.root));
+      e.target.reset();
+    } else {
+      alert("key value pair must be a number and string");
+    }
+  });
+
+  //remove event
+  formRemove.addEventListener("submit", function(e) {
+    var k;
+    e.preventDefault();
+    k = e.target.removeText.value;
+
+    if (Number(k) || k === 0) {
+      splayTree.remove(Number(k));
+      drawTree(visualJson(splayTree.root));
+      e.target.reset();
+    } else {
+      alert("key value must be a number");
+    }
+  });
+
+  //search event
+  formSearch.addEventListener("submit", function(e) {
+    var k;
+    e.preventDefault();
+    k = e.target.searchText.value;
+
+    if (Number(k) || k === 0) {
+      splayTree.search(Number(k));
+      drawTree(visualJson(splayTree.root));
+      e.target.reset();
+    } else {
+      alert("key value must be a number");
+    }
+  });
+
+  //process traversal button
+  inorderButton.addEventListener("click", function(e) {
+    e.preventDefault();
+    splayTree.inOrder(splayTree.root,function(x){console.log(x);});
+  });
+
+  //process max button
+  maxButton.addEventListener("click", function(e) {
+    e.preventDefault();
+    console.log(splayTree.max(splayTree.root));
+  });
+
+  //process min button
+  minButton.addEventListener("click", function(e) {
+    e.preventDefault();
+    console.log(splayTree.min(splayTree.root));
+  });
 
 };
 
 window.onload = init;
-
-
-  // request that bypasses CORS requirements using JSONP
-  var requestJSONP = function(url) {
-    // create script with passed in URL
-    var script = document.createElement('script');
-    script.src = url;
-    // after the script is loaded (and executed), remove it
-    script.addEventListener("load", function(e) {
-      e.target.remove();
-    });
-    // insert script tag into the DOM (append to <head>)
-    var head = document.getElementsByTagName('head')[0];
-    head.insertBefore(script, null);
-  }
-
-  //add button action
-  form.addEventListener("submit", function(e) {
-    e.preventDefault();
-    requestJSONP(listUrl(input.value));
-  });
