@@ -44,7 +44,15 @@ button {
   display: inline-block;
 }
 
-#tree-display {
+#info {
+  position: relative;
+  padding: 50px;
+}
+
+#info-close-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 
 @media(max-width:767px) {

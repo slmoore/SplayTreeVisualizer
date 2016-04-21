@@ -65,7 +65,7 @@ function SplayBst() {
 //then it is found, otherwise the closest
 //value is now the root and null is returned
 SplayBst.prototype.search = function(k) {
-  if (this.root === null || (typeof k !== "number" && typeof k !== "string"))
+  if (this.root === null || ( !(Number(k) || k === 0) && typeof k !== "string"))
     return null;
 
   this.splay(k);
@@ -80,8 +80,8 @@ SplayBst.prototype.search = function(k) {
 //new root links depend on the existing root key
 SplayBst.prototype.insert = function(k,v) {
   var n;
-  if ((typeof k !== "number" && typeof k !== "string") 
-    || (typeof v !== "number" && typeof v !== "string")) {
+  if (( !(Number(k) || k === 0) && typeof k !== "string") 
+    || ( !(Number(v) || v === 0) && typeof v !== "string")) {
     throw new Error("Invalid insert");
     return;
   }
@@ -126,7 +126,7 @@ SplayBst.prototype.insert = function(k,v) {
 // Garbage collector takes the node once it is disconnected
 SplayBst.prototype.remove = function(k) {
   var temp;
-  if (this.root === null || (typeof k !== "number" && typeof k !== "string"))
+  if (this.root === null || (!(Number(k) || k === 0) && typeof k !== "string"))
     return;
   //splay based on removal key
   this.splay(k);
@@ -234,7 +234,7 @@ SplayBst.prototype.contains = function(k) {
     }
   };
 
-  if (this.root === null || (typeof k !== "number" && typeof k !== "string"))
+  if (this.root === null || (!(Number(k) || k === 0) && typeof k !== "string"))
     return false;
 
   return containsRecursive(this.root) ? true : false;
@@ -354,7 +354,7 @@ SplayBst.prototype.splay = function(k) {
 
   }.bind(this);
 
-  if (this.root === null || (typeof k !== "number" && typeof k !== "string")) {
+  if (this.root === null || (!(Number(k) || k === 0) && typeof k !== "string")) {
     throw new Error("Invalid splay");
     return;
   }
@@ -524,32 +524,10 @@ var init = function() {
     });
   };
 
-//NOT WAITING FOR HIGHLIGHT/UNHIGHLIGHT TIMER
-//NEED TO HANDLE DEL
-  var highlight = function(x) {
-    if (!Array.isArray(x))
-      return;
-
-    x.forEach(function(current) {
-      //loop node elements checking for node
-      //apply style change when found
-      d3.selectAll("g.node").each(function(d,i) {
-        var clearStyle = function() {
-          d3.select(this).classed("selected", false);
-        }.bind(this);
-        if (d.key === current) {
-          d3.select(this).classed("selected", true);
-          setTimeout(clearStyle,500);
-        }
-      });
-    });
-  };
-
   //interactive elements
   var formAdd = document.getElementById("add-form");
   var formRemove = document.getElementById("remove-form");
   var formSearch = document.getElementById("search-form");
-  var inorderButton = document.getElementById("inorder-button");
   var minButton = document.getElementById("min-button");
   var maxButton = document.getElementById("max-button");
   //insert event
@@ -560,7 +538,7 @@ var init = function() {
     v = e.target.valText.value;
     rx = /^[a-z]+$/i;
 
-    if ((Number(k) || k === 0) && v.match(rx)) {
+    if ((Number(k) || k === "0") && v.match(rx)) {
       splayTree.insert(Number(k),v);
       drawTree(visualJson(splayTree.root));
       e.target.reset();
@@ -575,7 +553,7 @@ var init = function() {
     e.preventDefault();
     k = e.target.removeText.value;
 
-    if (Number(k) || k === 0) {
+    if (Number(k) || k === "0") {
       splayTree.remove(Number(k));
       drawTree(visualJson(splayTree.root));
       e.target.reset();
@@ -590,25 +568,13 @@ var init = function() {
     e.preventDefault();
     k = e.target.searchText.value;
 
-    if (Number(k) || k === 0) {
+    if (Number(k) || k === "0") {
       splayTree.search(Number(k));
       drawTree(visualJson(splayTree.root));
       e.target.reset();
     } else {
       alert("key value must be a number");
     }
-  });
-
-//NOT WORKING YET, ARRAY BUILD IS FINE, HIGHLIGHT IS NOT STAGGERED
-  //process traversal button
-  inorderButton.addEventListener("click", function(e) {
-    var a = [];
-    var ordered = function(n) {
-      a.push(n.key);
-    }
-    e.preventDefault();
-    splayTree.inOrder(splayTree.root,ordered);
-    highlight(a);
   });
 
   //process max button

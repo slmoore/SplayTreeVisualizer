@@ -55,17 +55,55 @@ Inspiration - visualgo.net
     <div id="tree-display"></div>
 
     <div id="bottom-options" class="row">
-      <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 column">
-        <button id="inorder-button" class="btn btn-default center-block">In-Order Traversal</button>
-      </div>
-      <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 column">
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 column">
         <button id="max-button" class="btn btn-default center-block">Find Max</button>
       </div>
-      <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 column">
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 column">
         <button id="min-button" class="btn btn-default center-block">Find Min</button>
       </div>
     </div>
 
+</div>
+
+<div id="info">
+  
+  <button id="info-close-button" class="btn btn-default center-block">X</button>
+
+  <h4 id="info-title">What is a Splay Tree?</h4>
+
+  <p>
+  A splay tree is a self-adjusting binary search tree (BST).  It allows for quicker access of data when the access pattern is non-uniform.  When searching for a node, tree rotations are performed until the closest matching node is located at the root.  This is called "splaying".  This means regularly accessed nodes will be located near the root of the tree.  When a program is often accessing the same nodes then splay tree operations are often faster than other search trees.
+  </p>
+
+  <p>
+  The amortized runtime for splay tree operations (insert, delete, search) is O(log n), which is equal to other self-balancing BSTs.  The narrower the access pattern, the faster the splay tree will be.  A disadvantage is the worst case runtime of O(n).  This happens if the splay tree becomes linear and the height of the tree is accessed.  However, this is a rare occurrence and over time the runtime maintains O(log n).
+  </p>
+
+  <p>
+  A good example for using a splay tree is when accessing Facebook friends.  A user may have hundreds or thousands of Facebook friends, but on average will only routinely visit a dozen of those friends.  Other useful applications for the splay tree is in caching and garbage collection.
+  </p>
+
+  <p>
+  Splay Trees were invented by Daniel Dominic Sleator and Robert Endre Tarjan in 1985.  All basic BST operations (insert, delete, search) include the "splaying" operation.  Splaying rotates a tree based on a few scenarios.  Let N be the node selected by an insert, delete, or search operation, let P be the parent node, and let G be the grandparent node.  If N is the root node, then exit the splaying operation.  Otherwise, if there is no G, then rotate N around P.  If there is a G, then perform one of two possible operations based on where the G and P are located.  If N is a left child and P is a left child or if N is a right child and P is a right child, then rotate N around P.  This is called a "Zig-Zig".  If N is a left child and P is a right child or if N is a right child and P is a left child (i.e. opposite child types), then rotate N around P and then rotate N around the former G.  This is called a "Zig-Zag".  Rotations continue until N is at the root.
+  </p>
+
+  <p>
+  These rules are repeated for the insert, delete, and search operations to get the selected node or the closest available to the root.  The search operation calls the splay and then if the root matches the search key, then it will return the root.  The insert operation calls the splay and if the new node is different from the root, it assigns the new node to the root and joins the former root to it.  If the insert is a duplicate, then different implementations will handle duplicates differently.  If duplicates are not allowed, then the insert can also be used as an update operation.  The delete operation calls the splay and if the root matches then remove its links so that the left and right children are now different trees or "split".  Splay the left subtree around its max (so that the left subtree root's right child is empty) and then "join" the right subtree with it as the right child.
+  </p>
+
+  <p>
+  Splay trees are a great option for storing a collection of data where only a small percentage of the nodes are regularly accessed.  While it does not always have a worst case runtime of O(log n) it will have a better runtime than other BSTs when the selected node was already recently selected.
+  </p>
+
+  <p>
+    <h4>References:</h4>
+    <ul>
+      <li><a href="https://en.wikipedia.org/wiki/Splay_tree">https://en.wikipedia.org/wiki/Splay_tree</a></li>
+      <li><a href="http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf">http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf</a></li>
+      <li><a href="http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf">http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf</a></li>
+      <li><a href="http://courses.cs.washington.edu/courses/cse326/01au/lectures/SplayTrees.ppt">http://courses.cs.washington.edu/courses/cse326/01au/lectures/SplayTrees.ppt</a></li>
+    </ul>
+  </p>
 </div>
 
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
