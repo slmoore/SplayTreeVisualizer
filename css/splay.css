@@ -22,10 +22,15 @@ h4 {
 }
 
 #bottom-options {
-  height: 40px;
+  max-height: 100px;
   width: 100%;
   position: fixed;
   bottom: 0;
+}
+
+#bottom-options h4 {
+  margin-top: 0;
+  margin-left: 30px;
 }
 
 input {
@@ -49,7 +54,7 @@ button {
   top: 0;
   right: 0;
   left: 0;
-  background-color: rgba(200,200,200,.85);
+  background-color: rgba(200,200,200,.9);
   padding: 50px;
 }
 
@@ -63,6 +68,7 @@ button {
 @media(max-width:767px) {
   label,input,button {font-size: 70% !important}
   #top-options {height: 190px !important}
+  #bottom-options h4 {font-size: 80% !important}
   body {margin-top: 190px !important}
 }
 
