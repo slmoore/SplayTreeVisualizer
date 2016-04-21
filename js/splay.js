@@ -417,7 +417,6 @@ var init = function() {
   //links
   var diagonal = d3.svg.diagonal().projection(function(d) { return [d.x, d.y]; });
 
-
   // Visualization with D3.js
   //
   // References:
@@ -478,6 +477,8 @@ var init = function() {
       .attr("d", diagonal);
   }
 
+  //find max node and highlight it
+  //for 2 seconds
   var highlightMax = function(t) {
     var maxNode;
     if (!(t instanceof SplayBst))
@@ -501,6 +502,8 @@ var init = function() {
     });
   };
 
+  //find min node and highlight it
+  //for 2 seconds
   var highlightMin = function(t) {
     var minNode;
     if (!(t instanceof SplayBst))
@@ -530,6 +533,13 @@ var init = function() {
   var formSearch = document.getElementById("search-form");
   var minButton = document.getElementById("min-button");
   var maxButton = document.getElementById("max-button");
+
+  //information elements
+  var treeDisplay = document.getElementById("tree-display");
+  var iOpen = document.getElementById("info-open-button");
+  var iClose = document.getElementById("info-close-button");
+  var infoDiv = document.getElementById("info");
+  
   //insert event
   formAdd.addEventListener("submit", function(e) {
     var k,v,rx;
@@ -588,6 +598,20 @@ var init = function() {
     e.preventDefault();
     highlightMin(splayTree);
   });
+
+  //processs information open button
+  iOpen.addEventListener("click", function(e) {
+    e.preventDefault();
+    infoDiv.classList.remove("hidden");
+    treeDisplay.classList.add("hidden");
+  });
+
+  //processs information close button
+  iClose.addEventListener("click", function(e) {
+    e.preventDefault();
+    treeDisplay.classList.remove("hidden");
+    infoDiv.classList.add("hidden");
+  });  
 
 };
 
