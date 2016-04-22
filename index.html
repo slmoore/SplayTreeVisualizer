@@ -1,7 +1,5 @@
 <!--
 Splay Tree Visualization
-
-Inspiration - visualgo.net
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -60,10 +58,10 @@ Inspiration - visualgo.net
       </div>
       <div class="row">
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 column">
-          <button id="max-button" class="btn btn-default center-block">Find Max</button>
+          <button id="max-button" class="btn btn-default center-block">Max</button>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 column">
-          <button id="min-button" class="btn btn-default center-block">Find Min</button>
+          <button id="min-button" class="btn btn-default center-block">Min</button>
         </div>
         <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 column">
           <button id="info-open-button" class="btn btn-success center-block">Information</button>
@@ -77,9 +75,51 @@ Inspiration - visualgo.net
   
   <button id="info-close-button" class="btn btn-default center-block">Close</button>
 
-  <h4 id="info-title">What is this?</h4>
+  <h3 id="info-title-how">How does it work?</h3>
 
-  <h4 id="info-title">What is a Splay Tree?</h4>
+  <p>My Splay Tree Visualizer is a tool to visualize the operations performed by a Splay Tree.  The idea is inspired by the algorithm visualizations found at <a href="http://visualgo.net/" target="_blank">visualgo.net</a>.  I have always found their presentations of algorithms and data structures to be helpful and hopefully my visualization of Splay Trees will be helpful as well.</p>
+
+  <p>My Splay Tree implementation is done purely in JavaScript and is modeled after a Java implementation done by Josh Israel and a Binary Search Tree implementation done by Robert Sedgewick.  The visualization is done with standard HTML, CSS, and JavaScript along with the Bootstrap CSS framework and D3.js data modeling library.  Bootstrap was helpful in making the display uniform using their grid system and as responsive as possible.  D3.js helps with the display process of turning the Tree data structure into connected SVG elements (scalable vector graphics).</p>
+
+  <h4>References:</h4>
+  <ul>
+  <li><a href="http://algs4.cs.princeton.edu/32bst/" target="_blank">http://algs4.cs.princeton.edu/32bst/</a></li>
+  <li><a href="http://algs4.cs.princeton.edu/33balanced/" target="_blank">http://algs4.cs.princeton.edu/33balanced/</a></li>
+  <li><a href="http://getbootstrap.com/" target="_blank">http://getbootstrap.com/</a></li>
+  <li><a href="https://d3js.org/" target="_blank">https://d3js.org/</a></li>
+  <li><a href="https://leanpub.com/D3-Tips-and-Tricks" target="_blank">https://leanpub.com/D3-Tips-and-Tricks</a></li>
+  <li><a href="http://visualgo.net/" target="_blank">http://visualgo.net/</a></li>
+  </ul>
+
+  <p>Below is a description of how to use the visualizer and for more information on Splay Trees in general continue to the bottom.</p>
+
+  <h4>Add/Update</h4>
+
+  <p>Under "Add/Update" type a number into the Key field and a word into the Value field, then click the add button.  Repeat these steps multiple times to see how the tree reacts.  Every insert "splays" the tree based on the new value and then assigns the new value as the root.  Every tree node will have a left child node and right child node which may be empty depending on the current tree order.  You can update existing nodes by typing in an existing key with a different value.  This will change the value and rotate the node to the root.</p>
+
+  <h4>Remove</h4>
+
+  <p>After nodes have been added to the tree you can remove them.  Under the "Remove" section, type an existing node key into the key field and click the remove button.  The maximum key that is less than the removed key will now be the root.  If a key chosen for removal does not exist, the tree will splay around the closest value to that key.</p>
+
+  <h4>Find</h4>
+
+  <p>Under "Find" type a key and click the Find button.  The tree will splay the key to the root if it exists.  If it does not exist the successor node (minimum node from the right subtree) will be the new root.</p>
+
+  <h4>Max</h4>
+
+  <p>On the bottom of the screen click the "Max" button.  This will Highlight in orange the node with the greatest key value.  It will last 2 seconds.  This operation does not splay the tree.</p>
+
+  <h4>Min</h4>
+
+  <p>On the bottom of the screen click the "Min" button.  This will Highlight in red the node with the smallest key value.  It will last 2 seconds.  This operation does not splay the tree.</p>
+
+  <h4>System Requirements</h4>
+
+  <p>Use a modern browser, preferably Chrome or Firefox.  If using Internet Explorer, please use version 10 or higher.</p>
+
+  <p>Use a device with a large screen size (desktop, laptop, most tablets).  The tree elements created as an SVG (scalable vector graphic) are not responsive to screen dimensions, so they may be difficult to see on smaller screens.</p>
+
+  <h3 id="info-title-what">What is a Splay Tree?</h3>
 
   <p>
   A splay tree is a self-adjusting binary search tree (BST).  It allows for quicker access of data when the access pattern is non-uniform.  When searching for a node, tree rotations are performed until the closest matching node is located at the root.  This is called "splaying".  This means regularly accessed nodes will be located near the root of the tree.  When a program is often accessing the same nodes then splay tree operations are often faster than other search trees.
@@ -108,10 +148,10 @@ Inspiration - visualgo.net
   <p>
     <h4>References:</h4>
     <ul>
-      <li><a href="https://en.wikipedia.org/wiki/Splay_tree">https://en.wikipedia.org/wiki/Splay_tree</a></li>
-      <li><a href="http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf">http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf</a></li>
-      <li><a href="http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf">http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf</a></li>
-      <li><a href="http://courses.cs.washington.edu/courses/cse326/01au/lectures/SplayTrees.ppt">http://courses.cs.washington.edu/courses/cse326/01au/lectures/SplayTrees.ppt</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Splay_tree" target="_blank">https://en.wikipedia.org/wiki/Splay_tree</a></li>
+      <li><a href="http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf" target="_blank">http://www.cs.cmu.edu/~sleator/papers/self-adjusting.pdf</a></li>
+      <li><a href="http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf" target="_blank">http://cs.brynmawr.edu/Courses/cs206/fall2012/slides/09_SplayTrees.pdf</a></li>
+      <li><a href="http://courses.cs.washington.edu/courses/cse326/01au/lectures/SplayTrees.ppt" target="_blank">http://courses.cs.washington.edu/courses/cse326/01au/lectures/SplayTrees.ppt</a></li>
     </ul>
   </p>
 </div>
