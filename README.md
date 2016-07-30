@@ -1,7 +1,7 @@
 # SplayTreeVisualizer
 Visualization of Splay Tree Operations
 
-<p><a href="http://slmoore.github.io/SplayTreeVisualizer/">See it Here</a></p>
+<h1><a href="http://slmoore.github.io/SplayTreeVisualizer/">See it Here</a></h1>
 
 <p>My Splay Tree Visualizer is a tool to visualize the operations performed by a Splay Tree.  The idea is inspired by the algorithm visualizations found at <a href="http://visualgo.net/" target="_blank">visualgo.net</a>.  I have always found their presentations of algorithms and data structures to be helpful and hopefully my visualization of Splay Trees will be helpful as well.</p>
 
