@@ -1,6 +1,8 @@
 # SplayTreeVisualizer
 Visualization of Splay Tree Operations
 
+<p><a href="http://slmoore.github.io/SplayTreeVisualizer/">See it Here</a></p>
+
 <p>My Splay Tree Visualizer is a tool to visualize the operations performed by a Splay Tree.  The idea is inspired by the algorithm visualizations found at <a href="http://visualgo.net/" target="_blank">visualgo.net</a>.  I have always found their presentations of algorithms and data structures to be helpful and hopefully my visualization of Splay Trees will be helpful as well.</p>
 
   <p>My Splay Tree implementation is done purely in JavaScript and is modeled after a Java implementation done by Josh Israel and a Binary Search Tree implementation done by Robert Sedgewick.  The visualization is done with standard HTML, CSS, and JavaScript along with the Bootstrap CSS framework and D3.js data modeling library.  Bootstrap was helpful in making the display uniform using their grid system and as responsive as possible.  D3.js helps with the display process of turning the Tree data structure into connected SVG elements (scalable vector graphics).</p>
